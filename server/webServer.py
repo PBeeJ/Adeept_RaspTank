@@ -18,9 +18,14 @@ import robotLight
 import switch
 import socket
 
+# # Temp add for profiling
+# import cProfile
+
 #websocket
 import asyncio
 import websockets
+import ssl
+import pathlib
 
 import json
 import app
@@ -69,6 +74,7 @@ init_pwm3 = scGear.initPos[3]
 init_pwm4 = scGear.initPos[4]
 
 fuc = functions.Functions()
+# cProfile.run('fuc.start()','/tmp/profile.log')
 fuc.start()
 
 curpath = os.path.realpath(__file__)
@@ -105,7 +111,8 @@ def FPV_thread():
 
 
 def ap_thread():
-    os.system("sudo create_ap wlan0 eth0 Adeept 12345678")
+    print("DON'T sudo create_ap wlan0 eth0 Adeept 12345678 because killing it seems to kill sshd")
+    # os.system("sudo create_ap wlan0 eth0 Adeept 12345678")
 
 
 def functionSelect(command_input, response):
@@ -539,7 +546,14 @@ if __name__ == '__main__':
 
     while  1:
         wifi_check()
+        ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        # Attempt 1 based on https://docs.python.org/3/library/ssl.html#module-ssl
+        ssl_context.load_cert_chain('/home/pi/adeept_rasptank/server/cert.pem')
+        # Attempt 2 based on https://blog.devolutions.net/2020/07/tutorial-how-to-generate-secure-self-signed-server-and-client-certificates-with-openssl
+        # ssl_context.load_cert_chain('/home/pi/server.crt')
         try:                  #Start server,waiting for client
+            start_ssl_server = websockets.serve(main_logic, '0.0.0.0', 8899, ssl=ssl_context)
+            asyncio.get_event_loop().run_until_complete(start_ssl_server)
             start_server = websockets.serve(main_logic, '0.0.0.0', 8888)
             asyncio.get_event_loop().run_until_complete(start_server)
             print('waiting for connection...')
