@@ -546,14 +546,14 @@ if __name__ == '__main__':
 
     while  1:
         wifi_check()
-        ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        # ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
         # Attempt 1 based on https://docs.python.org/3/library/ssl.html#module-ssl
-        ssl_context.load_cert_chain('/home/pi/adeept_rasptank/server/cert.pem')
+        # ssl_context.load_cert_chain('/home/pi/adeept_rasptank/server/cert.pem')
         # Attempt 2 based on https://blog.devolutions.net/2020/07/tutorial-how-to-generate-secure-self-signed-server-and-client-certificates-with-openssl
         # ssl_context.load_cert_chain('/home/pi/server.crt')
         try:                  #Start server,waiting for client
-            start_ssl_server = websockets.serve(main_logic, '0.0.0.0', 8899, ssl=ssl_context)
-            asyncio.get_event_loop().run_until_complete(start_ssl_server)
+            # start_ssl_server = websockets.serve(main_logic, '0.0.0.0', 8899, ssl=ssl_context)
+            # asyncio.get_event_loop().run_until_complete(start_ssl_server)
             start_server = websockets.serve(main_logic, '0.0.0.0', 8888)
             asyncio.get_event_loop().run_until_complete(start_server)
             print('waiting for connection...')
