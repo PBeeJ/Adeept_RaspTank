@@ -32,6 +32,7 @@ pwn_A = 0
 pwm_B = 0
 
 def motorStop():#Motor stops
+	print("motor_stop()")
 	GPIO.output(Motor_A_Pin1, GPIO.LOW)
 	GPIO.output(Motor_A_Pin2, GPIO.LOW)
 	GPIO.output(Motor_B_Pin1, GPIO.LOW)
@@ -61,41 +62,41 @@ def setup():#Motor initialization
 # This is the left side as LOOKING at the bot head on, not the bot's left
 def motor_left(status, direction, speed):#Motor 2 positive and negative rotation
 	print(f"motor_left({status}, {direction}, {speed})")
-	# if status == 0: # stop
-	# 	GPIO.output(Motor_B_Pin1, GPIO.LOW)
-	# 	GPIO.output(Motor_B_Pin2, GPIO.LOW)
-	# 	GPIO.output(Motor_B_EN, GPIO.LOW)
-	# else:
-	# 	if direction == Dir_backward:
-	# 		GPIO.output(Motor_B_Pin1, GPIO.HIGH)
-	# 		GPIO.output(Motor_B_Pin2, GPIO.LOW)
-	# 		pwm_B.start(100)
-	# 		pwm_B.ChangeDutyCycle(speed)
-	# 	elif direction == Dir_forward:
-	# 		GPIO.output(Motor_B_Pin1, GPIO.LOW)
-	# 		GPIO.output(Motor_B_Pin2, GPIO.HIGH)
-	# 		pwm_B.start(0)
-	# 		pwm_B.ChangeDutyCycle(speed)
+	if status == 0: # stop
+		GPIO.output(Motor_B_Pin1, GPIO.LOW)
+		GPIO.output(Motor_B_Pin2, GPIO.LOW)
+		GPIO.output(Motor_B_EN, GPIO.LOW)
+	else:
+		if direction == Dir_backward:
+			GPIO.output(Motor_B_Pin1, GPIO.HIGH)
+			GPIO.output(Motor_B_Pin2, GPIO.LOW)
+			pwm_B.start(100)
+			pwm_B.ChangeDutyCycle(speed)
+		elif direction == Dir_forward:
+			GPIO.output(Motor_B_Pin1, GPIO.LOW)
+			GPIO.output(Motor_B_Pin2, GPIO.HIGH)
+			pwm_B.start(0)
+			pwm_B.ChangeDutyCycle(speed)
 
 
 def motor_right(status, direction, speed):#Motor 1 positive and negative rotation
 	print(f"motor_right({status}, {direction}, {speed})")
-	# if status == 0: # stop
-	# 	GPIO.output(Motor_A_Pin1, GPIO.LOW)
-	# 	GPIO.output(Motor_A_Pin2, GPIO.LOW)
-	# 	GPIO.output(Motor_A_EN, GPIO.LOW)
-	# else:
-	# 	if direction == Dir_forward:#
-	# 		GPIO.output(Motor_A_Pin1, GPIO.HIGH)
-	# 		GPIO.output(Motor_A_Pin2, GPIO.LOW)
-	# 		pwm_A.start(100)
-	# 		pwm_A.ChangeDutyCycle(speed)
-	# 	elif direction == Dir_backward:
-	# 		GPIO.output(Motor_A_Pin1, GPIO.LOW)
-	# 		GPIO.output(Motor_A_Pin2, GPIO.HIGH)
-	# 		pwm_A.start(0)
-	# 		pwm_A.ChangeDutyCycle(speed)
-	# return direction
+	if status == 0: # stop
+		GPIO.output(Motor_A_Pin1, GPIO.LOW)
+		GPIO.output(Motor_A_Pin2, GPIO.LOW)
+		GPIO.output(Motor_A_EN, GPIO.LOW)
+	else:
+		if direction == Dir_forward:#
+			GPIO.output(Motor_A_Pin1, GPIO.HIGH)
+			GPIO.output(Motor_A_Pin2, GPIO.LOW)
+			pwm_A.start(100)
+			pwm_A.ChangeDutyCycle(speed)
+		elif direction == Dir_backward:
+			GPIO.output(Motor_A_Pin1, GPIO.LOW)
+			GPIO.output(Motor_A_Pin2, GPIO.HIGH)
+			pwm_A.start(0)
+			pwm_A.ChangeDutyCycle(speed)
+	return direction
 
 
 def move(speed, direction, turn, radius=0.5):   # 0 < radius <= 1  
@@ -134,20 +135,35 @@ def move(speed, direction, turn, radius=0.5):   # 0 < radius <= 1
 
 # Throttle and steering each range from [-100, 100]
 def moveTiltControl(throttle, steering):
-	if(throttle > 0):
+	print(f"moveTiltControl({throttle}, {steering})")
+	if(throttle > 40):
+		t = throttle - 30
 		if(steering > 0):
-			motor_left(1, left_forward, throttle)
-			motor_right(1, right_forward, throttle * (100 - steering) / 100.0)
+			motor_left(1, left_forward, t)
+			motor_right(1, right_forward, round(t * (100 - steering) / 100.0))
 		else:
-			motor_left(1, left_forward, throttle * (100 + steering) / 100.0)
-			motor_right(1, right_forward, throttle)
-	else: # throttle < 0
+			motor_left(1, left_forward, round(t * (100 + steering) / 100.0))
+			motor_right(1, right_forward, t)
+	elif(throttle < -40): # throttle < 0
+		t = throttle + 30
 		if(steering > 0):
-			motor_left(1, left_backward, -1 * throttle)
-			motor_right(1, right_backward, -1 * throttle * (100 - steering) / 100.0)
+			motor_left(1, left_backward, -1 * t)
+			motor_right(1, right_backward, -1 * round(t * (100 - steering) / 100.0))
 		else:
-			motor_left(1, left_backward, -1 * throttle * (100 + steering) / 100.0)
-			motor_right(1, right_backward, -1 * throttle)
+			motor_left(1, left_backward, -1 * round(t * (100 + steering) / 100.0))
+			motor_right(1, right_backward, -1 * t)
+	elif(abs(steering) > 40):
+		if(steering > 0):
+			motor_left(1, left_forward, steering)
+			motor_right(1, right_backward, round(steering * (40 - abs(throttle)) / 40.0))
+		else:
+			motor_left(1, left_backward, round(-steering * (40 - abs(throttle)) / 40.0))
+			motor_right(1, right_forward, -steering)
+	else:
+		motorStop()
+
+
+
 
 
 

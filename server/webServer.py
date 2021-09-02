@@ -208,12 +208,8 @@ def robotCtrl(command_input, response):
     global direction_command, turn_command
     if 'forward' == command_input:
         direction_command = 'forward'
-        move.move(speed_set, 'forward', 'left', rad)
-    
-    # if 'forwardLeft' == command_input:
-    #     direction_command = 'forward'
-    #     move.move(speed_set, 'forward', 'left', rad)
-    
+        move.move(speed_set, 'forward', 'no', rad)
+
     elif 'backward' == command_input:
         direction_command = 'backward'
         move.move(speed_set, 'backward', 'no', rad)
@@ -222,6 +218,9 @@ def robotCtrl(command_input, response):
         direction_command = 'no'
         if turn_command == 'no':
             move.move(speed_set, 'no', 'no', rad)
+
+    elif 'WheelStop' in command_input:
+        move.move(speed_set, 'no', 'no', rad)
 
 
     elif 'left' == command_input:
@@ -452,9 +451,9 @@ async def recv_msg(websocket):
 
         if isinstance(data,str):
 
-            if data.startswith('tiltControl'):
+            if data.startswith('TiltControl'):
                 throttleSteering = data.split()
-                move.moveTiltControl(int(throttleSteering[0]), int(throttleSteering[1]))
+                move.moveTiltControl(int(throttleSteering[1]), int(throttleSteering[2]))
 
             robotCtrl(data, response)
 
