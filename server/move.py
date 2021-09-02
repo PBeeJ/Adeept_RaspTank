@@ -58,45 +58,47 @@ def setup():#Motor initialization
 	except:
 		pass
 
-
+# This is the left side as LOOKING at the bot head on, not the bot's left
 def motor_left(status, direction, speed):#Motor 2 positive and negative rotation
-	if status == 0: # stop
-		GPIO.output(Motor_B_Pin1, GPIO.LOW)
-		GPIO.output(Motor_B_Pin2, GPIO.LOW)
-		GPIO.output(Motor_B_EN, GPIO.LOW)
-	else:
-		if direction == Dir_backward:
-			GPIO.output(Motor_B_Pin1, GPIO.HIGH)
-			GPIO.output(Motor_B_Pin2, GPIO.LOW)
-			pwm_B.start(100)
-			pwm_B.ChangeDutyCycle(speed)
-		elif direction == Dir_forward:
-			GPIO.output(Motor_B_Pin1, GPIO.LOW)
-			GPIO.output(Motor_B_Pin2, GPIO.HIGH)
-			pwm_B.start(0)
-			pwm_B.ChangeDutyCycle(speed)
+	print(f"motor_left({status}, {direction}, {speed})")
+	# if status == 0: # stop
+	# 	GPIO.output(Motor_B_Pin1, GPIO.LOW)
+	# 	GPIO.output(Motor_B_Pin2, GPIO.LOW)
+	# 	GPIO.output(Motor_B_EN, GPIO.LOW)
+	# else:
+	# 	if direction == Dir_backward:
+	# 		GPIO.output(Motor_B_Pin1, GPIO.HIGH)
+	# 		GPIO.output(Motor_B_Pin2, GPIO.LOW)
+	# 		pwm_B.start(100)
+	# 		pwm_B.ChangeDutyCycle(speed)
+	# 	elif direction == Dir_forward:
+	# 		GPIO.output(Motor_B_Pin1, GPIO.LOW)
+	# 		GPIO.output(Motor_B_Pin2, GPIO.HIGH)
+	# 		pwm_B.start(0)
+	# 		pwm_B.ChangeDutyCycle(speed)
 
 
 def motor_right(status, direction, speed):#Motor 1 positive and negative rotation
-	if status == 0: # stop
-		GPIO.output(Motor_A_Pin1, GPIO.LOW)
-		GPIO.output(Motor_A_Pin2, GPIO.LOW)
-		GPIO.output(Motor_A_EN, GPIO.LOW)
-	else:
-		if direction == Dir_forward:#
-			GPIO.output(Motor_A_Pin1, GPIO.HIGH)
-			GPIO.output(Motor_A_Pin2, GPIO.LOW)
-			pwm_A.start(100)
-			pwm_A.ChangeDutyCycle(speed)
-		elif direction == Dir_backward:
-			GPIO.output(Motor_A_Pin1, GPIO.LOW)
-			GPIO.output(Motor_A_Pin2, GPIO.HIGH)
-			pwm_A.start(0)
-			pwm_A.ChangeDutyCycle(speed)
-	return direction
+	print(f"motor_right({status}, {direction}, {speed})")
+	# if status == 0: # stop
+	# 	GPIO.output(Motor_A_Pin1, GPIO.LOW)
+	# 	GPIO.output(Motor_A_Pin2, GPIO.LOW)
+	# 	GPIO.output(Motor_A_EN, GPIO.LOW)
+	# else:
+	# 	if direction == Dir_forward:#
+	# 		GPIO.output(Motor_A_Pin1, GPIO.HIGH)
+	# 		GPIO.output(Motor_A_Pin2, GPIO.LOW)
+	# 		pwm_A.start(100)
+	# 		pwm_A.ChangeDutyCycle(speed)
+	# 	elif direction == Dir_backward:
+	# 		GPIO.output(Motor_A_Pin1, GPIO.LOW)
+	# 		GPIO.output(Motor_A_Pin2, GPIO.HIGH)
+	# 		pwm_A.start(0)
+	# 		pwm_A.ChangeDutyCycle(speed)
+	# return direction
 
 
-def move(speed, direction, turn, radius=0.6):   # 0 < radius <= 1  
+def move(speed, direction, turn, radius=0.5):   # 0 < radius <= 1  
 	#speed = 100
 	if direction == 'forward':
 		if turn == 'right':
@@ -104,7 +106,7 @@ def move(speed, direction, turn, radius=0.6):   # 0 < radius <= 1
 			motor_right(1, right_forward, speed)
 		elif turn == 'left':
 			motor_left(1, left_forward, speed)
-			motor_right(0, right_backward, int(speed*radius))
+			motor_right(1, right_forward, int(speed*radius))
 		else:
 			motor_left(1, left_forward, speed)
 			motor_right(1, right_forward, speed)
@@ -129,6 +131,23 @@ def move(speed, direction, turn, radius=0.6):   # 0 < radius <= 1
 			motorStop()
 	else:
 		pass
+
+# Throttle and steering each range from [-100, 100]
+def moveTiltControl(throttle, steering):
+	if(throttle > 0):
+		if(steering > 0):
+			motor_left(1, left_forward, throttle)
+			motor_right(1, right_forward, throttle * (100 - steering) / 100.0)
+		else:
+			motor_left(1, left_forward, throttle * (100 + steering) / 100.0)
+			motor_right(1, right_forward, throttle)
+	else: # throttle < 0
+		if(steering > 0):
+			motor_left(1, left_backward, -1 * throttle)
+			motor_right(1, right_backward, -1 * throttle * (100 - steering) / 100.0)
+		else:
+			motor_left(1, left_backward, -1 * throttle * (100 + steering) / 100.0)
+			motor_right(1, right_backward, -1 * throttle)
 
 
 

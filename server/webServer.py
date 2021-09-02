@@ -208,7 +208,11 @@ def robotCtrl(command_input, response):
     global direction_command, turn_command
     if 'forward' == command_input:
         direction_command = 'forward'
-        move.move(speed_set, 'forward', 'no', rad)
+        move.move(speed_set, 'forward', 'left', rad)
+    
+    # if 'forwardLeft' == command_input:
+    #     direction_command = 'forward'
+    #     move.move(speed_set, 'forward', 'left', rad)
     
     elif 'backward' == command_input:
         direction_command = 'backward'
@@ -440,12 +444,18 @@ async def recv_msg(websocket):
         try:
             data = json.loads(data)
         except Exception as e:
-            print('not A JSON')
+            pass
+            # print(f'not A JSON {data}')
 
         if not data:
             continue
 
         if isinstance(data,str):
+
+            if data.startswith('tiltControl'):
+                throttleSteering = data.split()
+                move.moveTiltControl(int(throttleSteering[0]), int(throttleSteering[1]))
+
             robotCtrl(data, response)
 
             switchCtrl(data, response)
@@ -515,8 +525,8 @@ async def recv_msg(websocket):
         else:
             pass
 
-        print(data)
         response = json.dumps(response)
+        # print(f"data: {data}, response: {response}")
         await websocket.send(response)
 
 async def main_logic(websocket, path):
